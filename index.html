@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        
+        body{
+            background-color: black;
+            margin-top:0px;
+        }
+        #navbar{
+            display:flex;
+            background-color: #282828;
+            height: 30px;
+            padding:1%;
+            justify-content: center;
+            
+        }
+        #city{
+            background-color:white;
+            color:black;
+            border:none;
+            padding-left: 15px;
+            width:30%;
+
+        }
+        button{
+            background-color: rgb(58, 58, 58);
+            border:none;
+            color:white;
+            width:10%;
+        }
+        input:focus{
+            outline:none
+        }
+        #display{
+            margin:auto;
+            margin-top:10px;
+            display:flex;
+            height:220px;
+            width:81%;
+            justify-content: center;
+            border:1px solid black;
+            
+            padding:10px 0px 10px 10px;
+            border-radius: 10px;
+        }
+        #display>div{
+            border:1px solid rgb(66, 66, 66);
+            width:13%;
+            height: 100%;
+            margin-right:10px;
+            text-align: center;
+            color:white;
+            line-height: 7px;
+            border-radius: 15px;
+            background-color: #1b1b1b;
+        
+        }
+        #display>div:hover{
+            background-color:#3a3a3a;
+        }
+        #maps{
+            margin:auto;
+            height:300px;
+            width:60%;
+            margin-top:5px;
+            
+        }
+        iframe{
+            height:300px;
+            width:100%;
+            border:none;
+            margin-top:5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="navbar">
+        <input type="text" id="city" placeholder="Enter City Name">
+        <button onclick="getweather()">Search</button>
+    </div>
+    <div id="display">
+
+    </div>
+    <div id="maps">
+        <iframe src="" id="iframe"></iframe>
+    </div>
+</body>
+</html>
+
+<script>
+    // var lat,lon;
+   var display=document.getElementById("display");
+
+    async function getweather(){
+        var city=document.getElementById('city').value
+        try{
+        let res= await fetch(
+            `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=03ae81c5b9bbc5697f3fbf7f07850e79&units=metric`
+        );
+        let data=await res.json();
+        var lat=data.coord.lat;
+        var lon=data.coord.lon;
+        days(lat,lon)
+        }catch(error){
+            console.log(`error : ${error}`)
+        }    
+
+    }
+    var days= async(lat,lon)=>{
+        try{
+            let res=await fetch(
+                `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&cnt=7&units=metric&exclude=hourly,minutely,alerts&appid=62aab7ee303508a9f5dba5c6a530546d`
+            
+            );
+            let data=await res.json();
+            let weather_data=data.daily;
+            console.log(weather_data);
+            appendData(weather_data)
+        }catch(error){
+            console.log("error:"+error); 2
+        }
+    }
+    function appendData(data){
+        display.innerHTML=null;
+        document.getElementById("maps").innerhtml=null;
+        let c=1
+        data.forEach(function(el){
+            c++;
+            if(c==7){
+                return;
+            }
+            console.log(el);
+        let div=document.createElement('div');
+        div.id="inner_div";
+        let max=document.createElement('h2');
+        max.innerText=el.temp.max+"°";
+
+        let min=document.createElement('h3');
+        min.innerText=el.temp.min+"°";
+
+        let icon=el.weather[0].icon;
+        let image=document.createElement('img');
+        image.src=`http://openweathermap.org/img/wn/${icon}@2x.png`
+
+        let h4=document.createElement('h4');
+        h4.textContent=el.weather[0].description;
+
+        div.append(max,min,image,h4);
+        display.append(div);
+        
+
+        })
+
+        
+
+        var city=document.getElementById('city').value;
+        let iframe=document.getElementById('iframe');
+        iframe.src=`https://www.google.com/maps/embed/v1/place?key=AIzaSyDcdBKrifCADS5RMe0MBYzukSp-ZbtoGqM&q=${city}`;
+  
+        
+    }
+</script>
